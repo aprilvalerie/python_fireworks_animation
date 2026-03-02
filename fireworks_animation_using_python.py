@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 pygame.init()
 
 WIDTH, HEIGHT = 800, 600
@@ -22,8 +23,39 @@ colors = [
 
 class Projectile:
     pass
-class  Firework:
-    pass
+class Firework:
+    RADIUS = 10
+    MAX_PROJECTILES = 50
+    MIN_PROJECTILES = 25
+    PROJECTILE_VEL = 4
+
+    def __init__(self, x, y, y_vel, explode_height, color):
+        self.x = x
+        self.y = y
+        self.y_vel = y_vel
+        self.explode_height = explode_height
+        self.color = color
+        self.projectiles = []
+        self.exploded = False
+
+    def explode(self):
+        self.exploded = True
+
+    def move(self, max_width, max_height):
+        if not self.exploded:
+            self.y += self.y_vel
+            if self.y >=  self.explode_height:
+                self.explode()
+
+
+
+    def draw(self, win):
+        if not self.exploded:
+            pygame.draw.circle(win, self.color, (self.x, self.y), self.RADIUS)
+
+        for projectile in self.projectiles:
+            projectile.draw(win)
+
 class  Launcher:
     WIDTH = 20
     HEIGHT = 20
@@ -39,9 +71,13 @@ class  Launcher:
     def draw(self, win):
         pygame.draw.rect(win, self.COLOR,    (self.x, self.y, self.WIDTH, self.HEIGHT))
 
+
     def launch(self):
-        pass
-     
+        color = random.choice(colors)
+        explode_height = random.randrange(50, 400)
+        firework = Firework(self.x + self.WIDTH/2, self.y, -5 , explode_height, color)
+        self.fireworks.append(firework)
+
     def loop(self, max_width, max_height):
         current_time = time.time()
         time_elapsed = current_time - self.start_time
