@@ -89,7 +89,7 @@ class Firework:
             current_angle += angle_dif
 
     def create_star_projectiles(self):
-        angle_dif =  math.pi / 8
+        angle_dif =  math.pi / 4
         current_angle = 0
         num_projectiles = 32
         for i in range(1, num_projectiles + 1):
@@ -104,20 +104,20 @@ class Firework:
     def move(self, max_width, max_height):
         if not self.exploded:
             self.y += self.y_vel
-            if self.y <=  self.explode_height:
+            if self.y <= self.explode_height:
                 self.explode()
 
-            projectiles_to_remove = []
-            for projectile in self.projectiles:
-                projectile.move()
+        projectiles_to_remove = []
+        for projectile in self.projectiles:
+            projectile.move()
 
-                if projectile.x >= max_width or projectile.x < 0:
-                    projectiles_to_remove.append(projectile)
-                elif projectile.y >= max_height or projectile.y < 0:
-                    projectiles_to_remove.append(projectile)
+            if projectile.x >= max_width or projectile.x < 0:
+                projectiles_to_remove.append(projectile)
+            elif projectile.y >= max_height or projectile.y < 0:
+                projectiles_to_remove.append(projectile)
 
-                for projectile in projectiles_to_remove:
-                    self.projectiles.remove(projectile)
+        for projectile in projectiles_to_remove:
+            self.projectiles.remove(projectile)
 
     def draw(self, win):
         if not self.exploded:
