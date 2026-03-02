@@ -1,6 +1,7 @@
 import pygame
 import time
 import random
+import math
 pygame.init()
 
 WIDTH, HEIGHT = 800, 600
@@ -22,7 +23,24 @@ colors = [
 ]
 
 class Projectile:
-    pass
+    WIDTH = 5
+    HEIGHT = 10
+    ALPHA_DECREMENT = 3
+
+
+    def __init__(self, x, y, x_vel, y_vel, color, alpha=255):
+        self.x = x
+        self.y = y
+        self.x_vel = x_vel
+        self.y_vel = y_vel
+        self.color = color
+        self.alpha = alpha
+
+    def move(self):
+        self.x += self.x_vel
+        self.y += self.y_vel
+        self.alpha = max(0, self.alpha - self.ALPHA_DECREMENT)
+
 class Firework:
     RADIUS = 10
     MAX_PROJECTILES = 50
@@ -40,6 +58,19 @@ class Firework:
 
     def explode(self):
         self.exploded = True
+        number_projectiles = random.randrange(self.MIN_PROJECTILES, self.MAX_PROJECTILES)
+        self.create_circular_projectile(number_projectiles)
+
+    def create_circular_projectile(self, num_projectiles):
+        angle_dif = 2 * math.pi / num_projectiles
+        current_angle = 0
+        vel = random.randrange(self.PROJECTILE_VEL - 1, self.PROJECTILE_VEL + 1)
+        for _ in range(num_projectiles):
+            x_vel = vel * math.cos(current_angle)
+            y_vel = vel * math.sin(current_angle)
+            color = random.choice(colors)
+            self.projectiles.append(Projectile(self.x, self.y, x_vel, y_vel, color))
+            current_angle += angle_dif
 
     def move(self, max_width, max_height):
         if not self.exploded:
@@ -47,12 +78,32 @@ class Firework:
             if self.y <=  self.explode_height:
                 self.explode()
 
+            projectiles_to_remove = []
+            for projectile in self.projectiles:
+                projectile.move()
 
+                if projectile.x >= max_width or projectile.x < 0:
+                    projectiles_to_remove.append(projectile)
+                elif projectile.y >= max_height or projectile.y < 0:
+                    projectiles_to_remove.append(projectile)
+
+                for projectile in projectiles_to_remove:
+                    self.projectiles.remove(projectile)
+
+
+
+    def draw(self, win):
+        self.draw_rect_alpha(win, self.color + (self.alpha,), (self.x, self.y, self.WIDTH, self.HEIGHT))
+
+    @staticmethod
+    def draw_rect_alpha(surface, color, rect):
+        shape_surf=pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+        surface.blit(shape_surf, rect)
 
     def draw(self, win):
         if not self.exploded:
             pygame.draw.circle(win, self.color, (self.x, self.y), self.RADIUS)
-
         for projectile in self.projectiles:
             projectile.draw(win)
 
@@ -97,21 +148,21 @@ class  Launcher:
         for firework in fireworks_to_remove:
             self.fireworks.remove(firework)
 
-
-
 def draw(launchers):
-    win.fill("black")
+    win.fill((0, 0, 0))
 
-    for  launcher in launchers:
+    for launcher in launchers:
         launcher.draw(win)
 
-        pygame.display.update()
+    pygame.display.update()
+
 
 def main():
      run = True
      clock = pygame.time.Clock()
 
-     launchers = [Launcher(100, HEIGHT - Launcher.HEIGHT, 3000)]
+     launchers = [Launcher(100, HEIGHT - Launcher.HEIGHT, 3000),Launcher(300, HEIGHT - Launcher.HEIGHT, 4000),
+                  Launcher(500, HEIGHT - Launcher.HEIGHT, 2000),Launcher(700, HEIGHT - Launcher.HEIGHT, 5000)]
 
      while run:
          clock.tick(FPS)
@@ -125,6 +176,9 @@ def main():
              launcher.loop(WIDTH, HEIGHT)
 
          draw(launchers)
+
+     pygame.quit()
+     quit()
 
 if __name__ == '__main__':
     main()
