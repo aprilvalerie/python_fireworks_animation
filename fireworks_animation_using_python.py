@@ -39,6 +39,20 @@ class  Launcher:
     def draw(self, win):
         pygame.draw.rect(win, self.COLOR,    (self.x, self.y, self.WIDTH, self.HEIGHT))
 
+    def launch(self):
+        pass
+     
+    def loop(self, max_width, max_height):
+        current_time = time.time()
+        time_elapsed = current_time - self.start_time
+
+        if time_elapsed * 1000 >= self.frequency:
+            self.start_time = current_time
+            self.launch()
+
+        #move frb
+
+
 def draw(launchers):
     win.fill("black")
 
@@ -51,6 +65,8 @@ def main():
      run = True
      clock = pygame.time.Clock()
 
+     launchers = [Launcher(100, HEIGHT - Launcher.HEIGHT, 3000)]
+
      while run:
          clock.tick(FPS)
 
@@ -58,6 +74,8 @@ def main():
              if event.type == pygame.QUIT:
                  run = False
                  break
+
+         draw(launchers)
 
 if __name__ == '__main__':
     main()
