@@ -41,6 +41,15 @@ class Projectile:
         self.y += self.y_vel
         self.alpha = max(0, self.alpha - self.ALPHA_DECREMENT)
 
+    def draw(self, win):
+        self.draw_rect_alpha(win, self.color + (self.alpha,), (self.x, self.y, self.WIDTH, self.HEIGHT))
+
+    @staticmethod
+    def draw_rect_alpha(surface, color, rect):
+        shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+        pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+        surface.blit(shape_surf, rect)
+
 class Firework:
     RADIUS = 10
     MAX_PROJECTILES = 50
@@ -48,6 +57,7 @@ class Firework:
     PROJECTILE_VEL = 4
 
     def __init__(self, x, y, y_vel, explode_height, color):
+        self.alpha = None
         self.x = x
         self.y = y
         self.y_vel = y_vel
@@ -59,18 +69,37 @@ class Firework:
     def explode(self):
         self.exploded = True
         number_projectiles = random.randrange(self.MIN_PROJECTILES, self.MAX_PROJECTILES)
-        self.create_circular_projectile(number_projectiles)
+
+        if random.randint(0, 1) == 0:
+            self.create_circular_projectile(number_projectiles)
+        else:
+            self.create_star_projectiles()
+
+
 
     def create_circular_projectile(self, num_projectiles):
         angle_dif = 2 * math.pi / num_projectiles
         current_angle = 0
         vel = random.randrange(self.PROJECTILE_VEL - 1, self.PROJECTILE_VEL + 1)
         for _ in range(num_projectiles):
-            x_vel = vel * math.cos(current_angle)
-            y_vel = vel * math.sin(current_angle)
+            x_vel = vel * math.sin(current_angle)
+            y_vel = vel * math.cos(current_angle)
             color = random.choice(colors)
             self.projectiles.append(Projectile(self.x, self.y, x_vel, y_vel, color))
             current_angle += angle_dif
+
+    def create_star_projectiles(self):
+        angle_dif =  math.pi / 8
+        current_angle = 0
+        num_projectiles = 32
+        for i in range(1, num_projectiles + 1):
+            vel = self.PROJECTILE_VEL + (i % (num_projectiles / 8))
+            x_vel = vel * math.sin(current_angle)
+            y_vel = vel * math.cos(current_angle)
+            color = random.choice(colors)
+            self.projectiles.append(Projectile(self.x, self.y, x_vel, y_vel, color))
+            if i % (num_projectiles / 8) == 0:
+                current_angle += angle_dif
 
     def move(self, max_width, max_height):
         if not self.exploded:
@@ -89,17 +118,6 @@ class Firework:
 
                 for projectile in projectiles_to_remove:
                     self.projectiles.remove(projectile)
-
-
-
-    def draw(self, win):
-        self.draw_rect_alpha(win, self.color + (self.alpha,), (self.x, self.y, self.WIDTH, self.HEIGHT))
-
-    @staticmethod
-    def draw_rect_alpha(surface, color, rect):
-        shape_surf=pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
-        pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
-        surface.blit(shape_surf, rect)
 
     def draw(self, win):
         if not self.exploded:
