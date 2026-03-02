@@ -44,7 +44,7 @@ class Firework:
     def move(self, max_width, max_height):
         if not self.exploded:
             self.y += self.y_vel
-            if self.y >=  self.explode_height:
+            if self.y <=  self.explode_height:
                 self.explode()
 
 
@@ -71,6 +71,8 @@ class  Launcher:
     def draw(self, win):
         pygame.draw.rect(win, self.COLOR,    (self.x, self.y, self.WIDTH, self.HEIGHT))
 
+        for fireworks in self.fireworks:
+            fireworks.draw(win)
 
     def launch(self):
         color = random.choice(colors)
@@ -86,7 +88,15 @@ class  Launcher:
             self.start_time = current_time
             self.launch()
 
-        #move frb
+        fireworks_to_remove = []
+        for fireworks in self.fireworks:
+            fireworks.move(max_width, max_height)
+            if fireworks.exploded and len(fireworks.projectiles) == 0:
+                fireworks_to_remove.append(fireworks)
+
+        for firework in fireworks_to_remove:
+            self.fireworks.remove(firework)
+
 
 
 def draw(launchers):
@@ -110,6 +120,9 @@ def main():
              if event.type == pygame.QUIT:
                  run = False
                  break
+
+         for launcher in launchers:
+             launcher.loop(WIDTH, HEIGHT)
 
          draw(launchers)
 
