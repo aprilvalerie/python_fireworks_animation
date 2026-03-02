@@ -1,4 +1,5 @@
 import pygame
+import time
 pygame.init()
 
 WIDTH, HEIGHT = 800, 600
@@ -18,6 +19,34 @@ colors = [
     (230, 230, 250),
     (255, 192, 203)
 ]
+
+class Projectile:
+    pass
+class  Firework:
+    pass
+class  Launcher:
+    WIDTH = 20
+    HEIGHT = 20
+    COLOR = "grey"
+
+    def __init__(self, x, y, frequency):
+        self.x = x
+        self.y = y
+        self.frequency = frequency
+        self. start_time = time.time()
+        self.fireworks = []
+
+    def draw(self, win):
+        pygame.draw.rect(win, self.COLOR,    (self.x, self.y, self.WIDTH, self.HEIGHT))
+
+def draw(launchers):
+    win.fill("black")
+
+    for  launcher in launchers:
+        launcher.draw(win)
+
+        pygame.display.update()
+
 def main():
      run = True
      clock = pygame.time.Clock()
@@ -33,5 +62,5 @@ def main():
 if __name__ == '__main__':
     main()
 
-    
+
 
